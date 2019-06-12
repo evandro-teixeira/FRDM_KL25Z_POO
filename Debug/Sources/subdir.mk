@@ -5,15 +5,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Sources/gpio.c \
-../Sources/main.c 
+../Sources/main.c \
+../Sources/spi.c 
 
 OBJS += \
 ./Sources/gpio.o \
-./Sources/main.o 
+./Sources/main.o \
+./Sources/spi.o 
 
 C_DEPS += \
 ./Sources/gpio.d \
-./Sources/main.d 
+./Sources/main.d \
+./Sources/spi.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

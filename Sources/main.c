@@ -30,15 +30,30 @@
 
 #include "MKL25Z4.h"
 #include "gpio.h"
+#include "spi.h"
 
 #define OFF (gpio_value_t)high
 #define ON  (gpio_value_t)low
+#define PIN_CS	GPIOE,4
 
 int main(void)
 {
 	/* Variaveis */
 	static uint8_t state = 0;
+	static uint8_t buffer[4] = {0,4,8,32};
 	uint32_t time = 0;
+	spi_config_t config_spi;
+
+	config_spi.spi = SPI0;
+	config_spi.alt = Alt_0;
+	config_spi.div = DIVISOR_1;
+	config_spi.pre = PRESCALE_2;
+
+	spi_t *spi_ci_1 = spi_new_object();
+
+	spi_add_attributes(spi_ci_1,/*SPI0,*/config_spi,PIN_CS);
+
+	spi_init(spi_ci_1);
 
 	/* Estancia Objeto LED's */
 	gpio_t *led_red = gpio_new_object();
@@ -62,6 +77,12 @@ int main(void)
 
 	for (;;)
 	{
+		spi_write(spi_ci_1,buffer,4);
+		buffer[0]++;
+		buffer[1]++;
+		buffer[2]++;
+		buffer[3]++;
+
 		switch(state)
 		{
 			case 0:
