@@ -35,11 +35,12 @@ void spi_add_attributes(spi_t *objt,/*SPI_MemMapPtr spi,*/ spi_config_t config_s
 	objt->config.div = config_spi.div;
 	objt->config.pre = config_spi.pre;
 	objt->config.alt = config_spi.alt;
-	//objt->port = port;
-	//objt->pin = pin;
 	objt->io_cs.port = port;
 	objt->io_cs.pin = pin;
 	objt->io_cs.dir = output;
+	// Inicializa GPIO CS
+	gpio_init(&objt->io_cs);
+	gpio_write(&objt->io_cs,high);
 }
 
 /**
@@ -114,8 +115,8 @@ void spi_init(spi_t *objt)
 	objt->config.spi->C1 |= SPI_C1_SPE_MASK;
 
 	// Inicializa GPIO CS
-	gpio_init(&objt->io_cs);
-	gpio_write(&objt->io_cs,high);
+	//gpio_init(&objt->io_cs);
+	//gpio_write(&objt->io_cs,high);
 }
 
 /**

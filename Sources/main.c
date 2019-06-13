@@ -31,6 +31,7 @@
 #include "MKL25Z4.h"
 #include "gpio.h"
 #include "spi.h"
+#include "mcp41010.h"
 
 #define OFF (gpio_value_t)high
 #define ON  (gpio_value_t)low

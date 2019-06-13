@@ -6,16 +6,19 @@
 C_SRCS += \
 ../Sources/gpio.c \
 ../Sources/main.c \
+../Sources/mcp41010.c \
 ../Sources/spi.c 
 
 OBJS += \
 ./Sources/gpio.o \
 ./Sources/main.o \
+./Sources/mcp41010.o \
 ./Sources/spi.o 
 
 C_DEPS += \
 ./Sources/gpio.d \
 ./Sources/main.d \
+./Sources/mcp41010.d \
 ./Sources/spi.d 
 
 
