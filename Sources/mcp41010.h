@@ -12,7 +12,7 @@
 
 typedef struct
 {
-	spi_t *mcp41010;
+	spi_t mcp41010;
 }mcp41010_t;
 
 mcp41010_t *mcp41010_new_object(void);

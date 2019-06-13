@@ -33,33 +33,117 @@
 #include "spi.h"
 #include "mcp41010.h"
 
-#define OFF (gpio_value_t)high
-#define ON  (gpio_value_t)low
-#define PIN_CS	GPIOE,4
+/**
+ *
+ */
+#define OFF 			(gpio_value_t)high
+#define ON  			(gpio_value_t)low
+#define POT_P1_PIN_CS	GPIOE,4
+#define POT_P2_PIN_CS	GPIOE,5
+
+/**
+ *
+ */
+void led_rgb_blink(void);
+void led_rgb_init(void);
+void potentiometer_init(void);
+void potentiometer_application(void);
+
+/**
+ *
+ */
+gpio_t *led_red;
+gpio_t *led_green;
+gpio_t *led_blue;
+mcp41010_t *pot_p1;
+mcp41010_t *pot_p2;
 
 int main(void)
 {
 	/* Variaveis */
-	static uint8_t state = 0;
-	static uint8_t buffer[4] = {0,4,8,32};
 	uint32_t time = 0;
-	spi_config_t config_spi;
 
-	config_spi.spi = SPI0;
-	config_spi.alt = Alt_0;
-	config_spi.div = DIVISOR_1;
-	config_spi.pre = PRESCALE_2;
+	led_rgb_init();
+	potentiometer_init();
 
-	spi_t *spi_ci_1 = spi_new_object();
+	for (;;)
+	{
+		led_rgb_blink();
+		potentiometer_application();
+		for(time=0;time<1000000;time++);
+    }
+    /* Never leave main */
+    return 0;
+}
 
-	spi_add_attributes(spi_ci_1,/*SPI0,*/config_spi,PIN_CS);
+/**
+ *
+ */
+void potentiometer_init(void)
+{
+	spi_config_t config;
 
-	spi_init(spi_ci_1);
+	config.alt = Alt_0;
+	config.div = DIVISOR_1;
+	config.pre = PRESCALE_2;
+	config.spi = SPI0;
 
+	pot_p1 = mcp41010_new_object();
+	pot_p2 = mcp41010_new_object();
+
+	mcp41010_add_attributes(pot_p1,config,POT_P1_PIN_CS);
+	mcp41010_add_attributes(pot_p2,config,POT_P2_PIN_CS);
+
+	/** Inicializa SPI */
+	mcp41010_init(pot_p1);
+	//mcp41010_init(pot_p2);
+}
+
+/**
+ *
+ */
+void potentiometer_application(void)
+{
+	static uint8_t value_p1 = 0, value_p2 = 0;
+	static uint8_t state = 0;
+
+	switch(state)
+	{
+		case 0:
+			// Envia comando de Escrita para o MCP41010
+			// e conteudo da variavel value_p1
+			mcp41010_write(pot_p1,0b00010001,value_p1++);
+			if(value_p1 >= 255)
+			{
+				value_p1 = 0;
+			}
+			state = 1;
+		break;
+		case 1:
+			if(value_p2 <= 0)
+			{
+				value_p2 = 255;
+			}
+			// Envia comando de Escrita para o MCP41010
+			// e conteudo da variavel value_p1
+			mcp41010_write(pot_p2,0b00010001,value_p2--);
+			state = 0;
+		break;
+		default:
+			state = 0;
+		break;
+	}
+}
+
+/**
+ *
+ */
+void led_rgb_init(void)
+{
 	/* Estancia Objeto LED's */
-	gpio_t *led_red = gpio_new_object();
-	gpio_t *led_green = gpio_new_object();
-	gpio_t *led_blue = gpio_new_object();
+	led_red = gpio_new_object();
+	led_green = gpio_new_object();
+	led_blue = gpio_new_object();
 
 	/* Add os parametros do atributos dos Objtos LED's */
 	gpio_add_attributes(led_red,GPIOB,output,18);
@@ -75,50 +159,45 @@ int main(void)
 	gpio_write(led_red,OFF);
 	gpio_write(led_green,OFF);
 	gpio_write(led_blue,OFF);
+}
 
-	for (;;)
+/**
+ *
+ */
+void led_rgb_blink(void)
+{
+	static uint8_t state = 0;
+
+	switch(state)
 	{
-		spi_write(spi_ci_1,buffer,4);
-		buffer[0]++;
-		buffer[1]++;
-		buffer[2]++;
-		buffer[3]++;
-
-		switch(state)
-		{
-			case 0:
-				gpio_toggle(led_red);
-				state = 1;
-			break;
-			case 1:
-				gpio_toggle(led_red);
-				state = 2;
-			break;
-			case 2:
-				gpio_toggle(led_green);
-				state = 3;
-			break;
-			case 3:
-				gpio_toggle(led_green);
-				state = 4;
-			break;
-			case 4:
-				gpio_toggle(led_blue);
-				state = 5;
-			break;
-			case 5:
-				gpio_toggle(led_blue);
-				state = 0;
-			break;
-			default:
-				state = 0;
-			break;
-		}
-
-		for(time=0;time<1000000;time++);
-    }
-    /* Never leave main */
-    return 0;
+		case 0:
+			gpio_toggle(led_red);
+			state = 1;
+		break;
+		case 1:
+			gpio_toggle(led_red);
+			state = 2;
+		break;
+		case 2:
+			gpio_toggle(led_green);
+			state = 3;
+		break;
+		case 3:
+			gpio_toggle(led_green);
+			state = 4;
+		break;
+		case 4:
+			gpio_toggle(led_blue);
+			state = 5;
+		break;
+		case 5:
+			gpio_toggle(led_blue);
+			state = 0;
+		break;
+		default:
+			state = 0;
+		break;
+	}
 }
 ////////////////////////////////////////////////////////////////////////////////
 // EOF

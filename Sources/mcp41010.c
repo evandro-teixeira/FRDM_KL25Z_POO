@@ -29,13 +29,17 @@ void mcp41010_del(mcp41010_t *objt)
  */
 void mcp41010_add_attributes(mcp41010_t *objt,spi_config_t config_spi,GPIO_MemMapPtr port,uint32_t pin)
 {
-	objt->mcp41010->config.alt = config_spi.alt;
-	objt->mcp41010->config.div = config_spi.div;
-	objt->mcp41010->config.pre = config_spi.pre;
-	objt->mcp41010->config.spi = config_spi.spi;
-	objt->mcp41010->io_cs.dir = output;
-	objt->mcp41010->io_cs.pin = pin;
-	objt->mcp41010->io_cs.port = port;
+	//objt->mcp41010.config.spi = config_spi.spi;
+	objt->mcp41010.config.alt = config_spi.alt;
+	objt->mcp41010.config.div = config_spi.div;
+	objt->mcp41010.config.pre = config_spi.pre;
+	objt->mcp41010.config.spi = config_spi.spi;
+	objt->mcp41010.io_cs.dir = output;
+	objt->mcp41010.io_cs.pin = pin;
+	objt->mcp41010.io_cs.port = port;
+
+	gpio_init((gpio_t*)&objt->mcp41010.io_cs);
+	gpio_write((gpio_t*)&objt->mcp41010.io_cs,high);
 }
 
 /**
@@ -43,9 +47,9 @@ void mcp41010_add_attributes(mcp41010_t *objt,spi_config_t config_spi,GPIO_MemMa
  */
 void mcp41010_init(mcp41010_t *objt)
 {
-	spi_init((spi_t*)&objt->mcp41010->config);
-	gpio_init((gpio_t*)&objt->mcp41010->io_cs);
-	gpio_write((gpio_t*)&objt->mcp41010->io_cs,high);
+	spi_init((spi_t*)&objt->mcp41010.config);
+	//gpio_init((gpio_t*)&objt->mcp41010.io_cs);
+	//gpio_write((gpio_t*)&objt->mcp41010.io_cs,high);
 }
 
 /**
@@ -56,5 +60,5 @@ void mcp41010_write(mcp41010_t *objt, uint8_t command, uint8_t value)
 	uint8_t buffer[2] = {0};
 	buffer[0] = command;
 	buffer[1] = value;
-	spi_write(objt->mcp41010,buffer,2);
+	spi_write((spi_t*)&objt->mcp41010,buffer,2);
 }
